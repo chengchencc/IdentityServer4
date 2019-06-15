@@ -29,28 +29,33 @@ namespace IdentityServer
         {
             services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
 
-            const string connectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;database=IdentityServer4.Quickstart.EntityFramework-2.3.0;trusted_connection=yes;";
+            const string connectionString = @"Data Source=(Local);database=IdentityServer4.Quickstart.EntityFramework-2.3.0;trusted_connection=yes;";
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
             var builder = services.AddIdentityServer()
                 .AddTestUsers(Config.GetUsers())
-                // this adds the config data from DB (clients, resources)
-                .AddConfigurationStore(options =>
-                {
-                    options.ConfigureDbContext = b =>
-                        b.UseSqlServer(connectionString,
-                            sql => sql.MigrationsAssembly(migrationsAssembly));
-                })
+                //this adds in memory config to test,if prod need to comment
+                .AddInMemoryApiResources(Config.GetApis())
+                .AddInMemoryClients(Config.GetClients())
+                .AddInMemoryIdentityResources(Config.GetIdentityResources())
+                .AddInMemoryPersistedGrants();
+                //// this adds the config data from DB (clients, resources)
+                //.AddConfigurationStore(options =>
+                //{
+                //    options.ConfigureDbContext = b =>
+                //        b.UseSqlServer(connectionString,
+                //            sql => sql.MigrationsAssembly(migrationsAssembly));
+                //})
                 // this adds the operational data from DB (codes, tokens, consents)
-                .AddOperationalStore(options =>
-                {
-                    options.ConfigureDbContext = b =>
-                        b.UseSqlServer(connectionString,
-                            sql => sql.MigrationsAssembly(migrationsAssembly));
+                //.AddOperationalStore(options =>
+                //{
+                //    options.ConfigureDbContext = b =>
+                //        b.UseSqlServer(connectionString,
+                //            sql => sql.MigrationsAssembly(migrationsAssembly));
 
-                    // this enables automatic token cleanup. this is optional.
-                    options.EnableTokenCleanup = true;
-                });
+                //    // this enables automatic token cleanup. this is optional.
+                //    options.EnableTokenCleanup = true;
+                //});
 
             if (Environment.IsDevelopment())
             {
@@ -89,7 +94,7 @@ namespace IdentityServer
         public void Configure(IApplicationBuilder app)
         {
             // this will do the initial DB population
-            InitializeDatabase(app);
+            //InitializeDatabase(app);
 
             if (Environment.IsDevelopment())
             {
